@@ -8,8 +8,8 @@ model Group {
     icon String?
     visible Boolean @default(true)
 
-    permissions_grant BigInt @default(0)
-    permissions_revoke BigInt @default(0)
+    permissions_grant Int @default(0)
+    permissions_revoke Int @default(0)
 
     accounts Account[]
 

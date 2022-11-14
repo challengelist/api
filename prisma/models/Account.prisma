@@ -11,8 +11,8 @@ model Account {
     groups  Group[]
     profile Player?
 
-    permissions_grant BigInt @default(0)
-    permissions_revoke BigInt @default(0)
+    permissions_grant Int @default(0)
+    permissions_revoke Int @default(0)
     
     sessions Session[]
 
