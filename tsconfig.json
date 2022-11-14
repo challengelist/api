@@ -13,6 +13,7 @@
     },
     "include": [
         "prisma/**/*.ts",
-        "src/**/*.ts"
+        "src/**/*.ts",
+        "routes/**/*.ts"
     ]
 }
