@@ -6,6 +6,7 @@ model Group {
     color String @default("#FFFFFF")
     background_color String @default("#000000")
     icon String?
+    visible Boolean @default(true)
 
     permissions_grant BigInt @default(0)
     permissions_revoke BigInt @default(0)
