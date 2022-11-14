@@ -15,7 +15,7 @@ model Challenge {
     creators  Player[] @relation("created_challenges")
     completers Player[] @relation("completed_challenges")
 
-    @@map("challenge")
+    @@map("challenges")
 }
 
 model Player {

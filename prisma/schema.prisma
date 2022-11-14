@@ -9,17 +9,18 @@ generator client {
 }
 
 model Account {
-  id                 Int      @id @default(autoincrement())
+  id                 Int       @id @default(autoincrement())
+  sessions           Session[]
   profile            Player?
   groups             Group[]
   badges             Badge[]
-  username           String   @unique
+  username           String    @unique
   password_hash      String
-  created_at         DateTime @default(now())
-  updated_at         DateTime @default(now())
-  api_key            String?  @unique
-  permissions_grant  BigInt   @default(0)
-  permissions_revoke BigInt   @default(0)
+  created_at         DateTime  @default(now())
+  updated_at         DateTime  @default(now())
+  api_key            String?   @unique
+  permissions_grant  BigInt    @default(0)
+  permissions_revoke BigInt    @default(0)
 
   @@map("accounts")
 }
@@ -62,6 +63,15 @@ model Badge {
   @@map("badges")
 }
 
+model Session {
+  id            Int     @id @default(autoincrement())
+  account_id    Int
+  session_token String  @unique
+  account       Account @relation(fields: [account_id], references: [id])
+
+  @@map("sessions")
+}
+
 model Challenge {
   id           Int             @id @default(autoincrement())
   verifier_id  Int
@@ -73,10 +83,11 @@ model Challenge {
   name         String
   position     Int
   level_id     Int?
-  fps          Int?
+  fps          String?
   status       ChallengeStatus @default(VISIBLE)
+  points_worth Int?
 
-  @@map("challenge")
+  @@map("challenges")
 }
 
 model Integration {
@@ -87,12 +98,8 @@ model Integration {
   refresh_token String?
   token_type    String?
   expires_in    Int?
-}
 
-model Session {
-  id            Int    @id @default(autoincrement())
-  account_id    Int
-  session_token String @unique
+  @@map("integrations")
 }
 
 enum BadgeObtainType {

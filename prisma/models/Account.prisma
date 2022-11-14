@@ -13,6 +13,8 @@ model Account {
 
     permissions_grant BigInt @default(0)
     permissions_revoke BigInt @default(0)
+    
+    sessions Session[]
 
     @@map("accounts")
 }
@@ -32,3 +34,10 @@ model Badge {
     id     Int       @id @default(autoincrement())
     owners Account[]
 }
+
+model Session {
+    id            Int    @id @default(autoincrement())
+    account_id    Int
+    account Account @relation(fields: [account_id], references: [id])
+}
+
