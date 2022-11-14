@@ -1,5 +1,5 @@
-import { Request } from "express";
 import { Account, Badge, Group, Player } from "@prisma/client";
+import { Request } from "express";
 
 /**
  * Represents an API request with additional parameter.
@@ -10,4 +10,4 @@ export interface ApiRequest extends Request {
         groups: Group[];
         profile: Player | null;
     };
-};
+}

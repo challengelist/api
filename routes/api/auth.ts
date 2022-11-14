@@ -1,7 +1,5 @@
-import { Router } from "express";
-import fs from "fs";
-import path from "path";
 import argon2 from "argon2";
+import { Router } from "express";
 import jsonwebtoken from "jsonwebtoken";
 import { Database } from "../../prisma/";
 import { ApiRequest } from "../../src/interfaces/ApiRequest";
@@ -37,7 +35,7 @@ router.post("/register", async (req: ApiRequest, res: ApiResponse) => {
     }
 
     // Create the account.
-    let data = await Database.account.create({
+    const data = await Database.account.create({
         data: {
             username: req.body.username as string,
             password_hash: await argon2.hash(req.body.password, {
@@ -95,12 +93,12 @@ router.post("/login", async (req: ApiRequest, res: ApiResponse) => {
 
     // Create a session token.
     let token;
-    if (process.env.CL_USE_RSA256_JWT == "true") {
+    if (process.env.CL_USE_RSA256_JWT === "true") {
         token = jsonwebtoken.sign({
             id: account.id,
             username: account.username,
             token_type: TokenType.SESSION,
-        }, GlobalSingleton.rsaKey!, {
+        }, GlobalSingleton.rsaKey ?? "", {
             algorithm: "RS256",
             expiresIn: "7d"
         });

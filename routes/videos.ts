@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { ApiRequest } from "../src/interfaces/ApiRequest";
-import { ApiResponse } from "../src/interfaces/ApiResponse";
 import fs from "fs";
 import path from "path";
+import { ApiRequest } from "../src/interfaces/ApiRequest";
+import { ApiResponse } from "../src/interfaces/ApiResponse";
 
 const router = Router();
 
@@ -21,8 +21,8 @@ router.get("/", async(req: ApiRequest, res: ApiResponse) => {
         data: fs.readdirSync(path.join(__dirname, "../", "data/videos")).map((file) => {
             return "/videos/" + file;
         })
-    })
-})
+    });
+});
 
 export {
     router

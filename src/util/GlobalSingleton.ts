@@ -10,11 +10,11 @@ export const GlobalSingleton = new class GlobalSingleton {
     public jwtToken: string;
     
     constructor() {
-        if (process.env.CL_USE_RSA256_JWT == "true") {
-            this.rsaKey = fs.readFileSync(path.join(__dirname, "../../", `data/${process.env.CL_RSA256_FILE!}`));
-            this.rsaPublicKey = fs.readFileSync(path.join(__dirname, "../../", `data/${process.env.CL_RSA256_PUBLIC_FILE!}`))
+        if (process.env.CL_USE_RSA256_JWT === "true") {
+            this.rsaKey = fs.readFileSync(path.join(__dirname, "../../", `data/${process.env.CL_RSA256_FILE ?? ""}`));
+            this.rsaPublicKey = fs.readFileSync(path.join(__dirname, "../../", `data/${process.env.CL_RSA256_PUBLIC_FILE ?? ""}`));
         }
         
-        this.jwtToken = process.env.CL_JWT_SECRET!;
+        this.jwtToken = process.env.CL_JWT_SECRET ?? "";
     }
-}
+};

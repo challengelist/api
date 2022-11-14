@@ -14,14 +14,14 @@ interface TokenData {
 
 export class AccountMiddleware {
     static async assertToken(token: string) {
-        return new Promise(async (resolve, reject) => {
+        return new Promise(async (resolve,) => {
             if (process.env.CL_USE_RSA256_JWT === "true") {
                 // Attempt to validate it as a RSA256 token, first.
-                await jsonwebtoken.verify(token, GlobalSingleton.rsaPublicKey!, async (err, decoded) => {
-                    if (err || !decoded) {
+                await jsonwebtoken.verify(token, GlobalSingleton.rsaPublicKey ?? "", async (err, decoded) => {
+                    if (err || decoded === undefined) {
                         // Attempt to validate it as a standard token, next.
                         jsonwebtoken.verify(token, GlobalSingleton.jwtToken, async (err, decoded) => {
-                            if (err || !decoded) {
+                            if (err || decoded === undefined) {
                                 resolve(null);
                             }
 
@@ -32,21 +32,21 @@ export class AccountMiddleware {
 
                     // Return the decoded data.
                     resolve(decoded);
-                })
+                });
             } else {
                 // Attempt to validate it as a standard token, first.
                 await jsonwebtoken.verify(token, GlobalSingleton.jwtToken, async (err, decoded) => {
-                    if (err || !decoded) {
+                    if (err || decoded === undefined) {
                         resolve(null);
                     }
 
                     // Return the decoded data.
                     resolve(decoded);
-                })
+                });
             }
 
             return null;
-        })
+        });
     }
 
     static async getAccount(decodedData: TokenData) {
@@ -54,7 +54,7 @@ export class AccountMiddleware {
             where: {
                 id: decodedData.id
             }
-        })
+        });
     }
 
     static async handle(req: ApiRequest, res: ApiResponse, next: NextFunction) {
@@ -68,7 +68,7 @@ export class AccountMiddleware {
                 // Assert token validity.
                 const decodedData = await AccountMiddleware.assertToken(token);
 
-                if (!decodedData) {
+                if (decodedData === null) {
                     return next();
                 }
 
@@ -82,11 +82,11 @@ export class AccountMiddleware {
                         groups: true,
                         profile: true
                     }
-                })
+                });
 
                 // Set the account.
                 if (account) {
-                    req.account = account
+                    req.account = account;
                 }
             }
         }

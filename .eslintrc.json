@@ -1,0 +1,46 @@
+{
+    "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/recommended",
+        "plugin:import/recommended",
+        "plugin:import/typescript"
+    ],
+    "rules": {
+        "quotes": [
+            "error",
+            "double"
+        ],
+        "semi": [
+            "error",
+            "always"
+        ],
+        "eqeqeq": [
+            "error",
+            "always"
+        ],
+        "curly": "error",
+        "@typescript-eslint/no-inferrable-types": "off",
+        "@typescript-eslint/no-explicit-any": "off",
+        "@typescript-eslint/no-var-requires": "off",
+        "no-async-promise-executor": "off",
+        "sort-imports": [
+            "error",
+            {
+                "ignoreDeclarationSort": true
+            }
+        ],
+        "import/order": [
+            "error",
+            {
+              "alphabetize": { "order": "asc", "caseInsensitive": true },
+              "groups": [["builtin", "external"], "internal", "parent", "sibling"]
+            }
+        ]
+    },
+    "settings": {
+        "import/resolver": {
+            "node": true,
+            "typescript": true
+        }
+    }
+}

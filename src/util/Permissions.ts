@@ -22,4 +22,4 @@ export enum Permissions {
     // LIST HELPER PERMISSIONS
     MANAGE_RECORDS = 1 << 10,
     MANAGE_SUBMITTERS = 1 << 11, 
-};
+}

@@ -22,7 +22,7 @@ export class RouterMiddleware {
 
                     // Get all the keys of the route object.
                     const keys = Object.keys(route);
-                    for (let key of keys) {
+                    for (const key of keys) {
                         // Import the router.
                         const router = route[key];
                         if (router.stack) {

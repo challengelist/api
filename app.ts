@@ -1,11 +1,11 @@
-import dotenv from "dotenv";
 import chalk from "chalk";
+import dotenv from "dotenv";
 import express from "express";
 import morgan from "morgan";
 import multer from "multer";
 
-import { RouterMiddleware } from "./src/middleware/RouterMiddleware";
 import { AccountMiddleware } from "./src/middleware/AccountMiddleware";
+import { RouterMiddleware } from "./src/middleware/RouterMiddleware";
 
 // Add environment variables.
 dotenv.config();
@@ -37,23 +37,23 @@ app.use(morgan((tokens, req, res) => {
             break;
     }
 
-    let status = parseInt(tokens.status(req, res)!);
+    const status = parseInt(tokens.status(req, res) ?? "500");
     let statusString = "";
     let statusHeader;
 
     if (status >= 200 && status < 400) {
         statusString = chalk.bgHex("#00ffaa").black(` ${status} `);
-        statusHeader = chalk.hex("#00ffaa")(` SUCCESS`);
+        statusHeader = chalk.hex("#00ffaa")(" SUCCESS");
     } else if (status >= 400 && status < 500) {
         statusString = chalk.bgHex("#ff0040").black(` ${status} `);
-        statusHeader = chalk.hex("#ff0040")(` FAILURE`);
+        statusHeader = chalk.hex("#ff0040")(" FAILURE");
     } else if (status >= 500 && status < 600) {
         statusString = chalk.bgHex("#4000ff").black(` ${status} `);
-        statusHeader = chalk.hex("#4000ff")(`   ERROR`);
+        statusHeader = chalk.hex("#4000ff")("   ERROR");
     }
 
-    let url = tokens.url(req, res)
-    statusString = statusString.padStart(Math.max(1, 15 - url!.length), "E")
+    const url = tokens.url(req, res);
+    statusString = statusString.padStart(Math.max(1, 15 - (url?.length ?? 0)), "E");
 
     return [`[${chalk.gray(tokens.date(req, res, "clf"))}]`, statusHeader, method, tokens.url(req, res), statusString, "-", tokens["response-time"](req, res), "ms"].join(" ");
 }));
@@ -68,5 +68,5 @@ RouterMiddleware.handle(app);
 // Create a listener.
 app.listen(process.env.CL_PORT, () => {
     console.log(`Server started on port ${process.env.CL_PORT}!`);   
-    console.log(``);   
+    console.log("");   
 });
