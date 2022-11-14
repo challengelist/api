@@ -1,7 +1,7 @@
 model Group {
     id Int @id @default(autoincrement())
     name String
-    short_name String
+    short_name String?
     priority Int
     color String @default("#FFFFFF")
     background_color String @default("#000000")
