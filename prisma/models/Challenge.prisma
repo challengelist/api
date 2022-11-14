@@ -1,0 +1,33 @@
+model Challenge {
+    id       Int    @id @default(autoincrement())
+    name     String
+    position Int
+
+    verifier_id  Int
+    publisher_id Int
+    level_id     Int?
+    fps          String?
+    status       ChallengeStatus @default(VISIBLE)
+    points_worth Int?
+
+    verifier  Player   @relation("verified_challenges", fields: [verifier_id], references: [id])
+    publisher Player   @relation("published_challenges", fields: [publisher_id], references: [id])
+    creators  Player[] @relation("created_challenges")
+    completers Player[] @relation("completed_challenges")
+
+    @@map("challenge")
+}
+
+model Player {
+    id                   Int         @id @default(autoincrement())
+    created_challenges   Challenge[] @relation("created_challenges")
+    published_challenges Challenge[] @relation("published_challenges")
+    verified_challenges  Challenge[] @relation("verified_challenges")
+    completed_challenges Challenge[] @relation("completed_challenges")
+}
+
+enum ChallengeStatus {
+    HIDDEN
+    REMOVED
+    VISIBLE
+}

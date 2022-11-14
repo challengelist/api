@@ -1,0 +1,5 @@
+model Session {
+    id            Int    @id @default(autoincrement())
+    account_id    Int
+    session_token String @unique
+}

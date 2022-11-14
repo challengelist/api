@@ -1,0 +1,31 @@
+model Player {
+    id Int @id @default(autoincrement())
+    name String
+    banned Boolean @default(false)
+    account_id Int? @unique
+
+    created_challenges Challenge[] @relation("created_challenges")
+    published_challenges Challenge[] @relation("published_challenges")
+    verified_challenges Challenge[] @relation("verified_challenges")
+    completed_challenges Challenge[] @relation("completed_challenges")
+
+    account Account? @relation(fields: [account_id], references: [id])
+
+    @@map("players")
+}
+
+model Account {
+    id            Int    @id @default(autoincrement())
+    profile Player? 
+}
+
+model Challenge {
+    id Int @id @default(autoincrement())
+    verifier_id Int
+    publisher_id Int
+    
+    verifier Player @relation("verified_challenges", fields: [verifier_id], references: [id])
+    publisher Player @relation("published_challenges", fields: [publisher_id], references: [id])
+    creators Player[] @relation("created_challenges")
+    completers Player[] @relation("completed_challenges")
+}

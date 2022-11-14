@@ -1,0 +1,21 @@
+model Group {
+    id Int @id @default(autoincrement())
+    name String
+    short_name String
+    priority Int
+    color String @default("#FFFFFF")
+    background_color String @default("#000000")
+    icon String?
+
+    permissions_grant BigInt @default(0)
+    permissions_revoke BigInt @default(0)
+
+    accounts Account[]
+
+    @@map("groups")
+}
+
+model Account {
+    id            Int    @id @default(autoincrement())
+    groups       Group[]
+}

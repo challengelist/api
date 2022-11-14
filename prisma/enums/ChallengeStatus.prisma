@@ -1,0 +1,5 @@
+enum ChallengeStatus {
+    HIDDEN
+    REMOVED
+    VISIBLE
+}

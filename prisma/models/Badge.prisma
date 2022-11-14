@@ -1,0 +1,20 @@
+model Badge {
+    id Int @id @default(autoincrement())
+    name String
+    obtain_type BadgeObtainType
+
+    owners Account[]
+
+    @@map("badges")
+}
+
+enum BadgeObtainType {
+    POINTS
+    POSITION
+    SPECIAL
+}
+
+model Account {
+    id            Int    @id @default(autoincrement())
+    badges        Badge[]
+}

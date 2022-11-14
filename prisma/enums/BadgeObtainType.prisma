@@ -1,0 +1,5 @@
+enum BadgeObtainType {
+    POINTS
+    POSITION
+    SPECIAL
+}

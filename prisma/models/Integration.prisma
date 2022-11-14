@@ -1,0 +1,14 @@
+model Integration {
+    id            Int             @id @default(autoincrement())
+    type          IntegrationType
+    account_id    Int
+    access_token  String
+    refresh_token String?
+    token_type    String?
+    expires_in    Int?
+}
+
+enum IntegrationType {
+    DISCORD
+    GEOMETRY_DASH
+}
