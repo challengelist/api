@@ -5,6 +5,7 @@ import morgan from "morgan";
 import multer from "multer";
 
 import { RouterMiddleware } from "./src/middleware/RouterMiddleware";
+import { AccountMiddleware } from "./src/middleware/AccountMiddleware";
 
 // Add environment variables.
 dotenv.config();
@@ -57,8 +58,12 @@ app.use(morgan((tokens, req, res) => {
     return [`[${chalk.gray(tokens.date(req, res, "clf"))}]`, statusHeader, method, tokens.url(req, res), statusString, "-", tokens["response-time"](req, res), "ms"].join(" ");
 }));
 
-// Handle our own upper middleware.
+// Our own middleware next.
+app.use(AccountMiddleware.handle);
+
+// Handle our own lower router-esque middleware.
 RouterMiddleware.handle(app);
+
 
 // Create a listener.
 app.listen(process.env.CL_PORT, () => {
