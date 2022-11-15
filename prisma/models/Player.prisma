@@ -7,7 +7,7 @@ model Player {
     created_challenges Challenge[] @relation("created_challenges")
     published_challenges Challenge[] @relation("published_challenges")
     verified_challenges Challenge[] @relation("verified_challenges")
-    completed_challenges Challenge[] @relation("completed_challenges")
+    records Record[]
 
     account Account? @relation(fields: [account_id], references: [id])
 
@@ -27,5 +27,10 @@ model Challenge {
     verifier Player @relation("verified_challenges", fields: [verifier_id], references: [id])
     publisher Player @relation("published_challenges", fields: [publisher_id], references: [id])
     creators Player[] @relation("created_challenges")
-    completers Player[] @relation("completed_challenges")
+}
+
+model Record {
+    id Int @id @default(autoincrement())
+    player_id Int
+    player Player @relation(fields: [player_id], references: [id])
 }

@@ -10,9 +10,11 @@ model Account {
     badges  Badge[]
     groups  Group[]
     profile Player?
+    submissions Record[]
 
     permissions_grant Int @default(0)
     permissions_revoke Int @default(0)
+    flags Int @default(0)
     
     sessions Session[]
 
@@ -33,6 +35,12 @@ model Player {
 model Badge {
     id     Int       @id @default(autoincrement())
     owners Account[]
+}
+
+model Record {
+    id Int @id @default(autoincrement())
+    submitter_id Int?
+    submitter Account? @relation(fields: [submitter_id], references: [id])
 }
 
 model Session {

@@ -13,7 +13,7 @@ model Challenge {
     verifier  Player   @relation("verified_challenges", fields: [verifier_id], references: [id])
     publisher Player   @relation("published_challenges", fields: [publisher_id], references: [id])
     creators  Player[] @relation("created_challenges")
-    completers Player[] @relation("completed_challenges")
+    records   Record[]
 
     @@map("challenges")
 }
@@ -23,11 +23,15 @@ model Player {
     created_challenges   Challenge[] @relation("created_challenges")
     published_challenges Challenge[] @relation("published_challenges")
     verified_challenges  Challenge[] @relation("verified_challenges")
-    completed_challenges Challenge[] @relation("completed_challenges")
 }
 
 enum ChallengeStatus {
     HIDDEN
     REMOVED
     VISIBLE
+}
+model Record {
+    id Int @id @default(autoincrement())
+    challenge_id Int
+    challenge Challenge @relation(fields: [challenge_id], references: [id])
 }

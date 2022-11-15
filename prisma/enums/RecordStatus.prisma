@@ -1,0 +1,6 @@
+enum RecordStatus {
+    APPROVED
+    REJECTED
+    UNDER_CONSIDERATION
+    SUBMITTED
+}
