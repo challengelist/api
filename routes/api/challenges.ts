@@ -8,6 +8,42 @@ import { Database } from "../../prisma";
 
 const router = Router();
 
+router.get("/", async (req: ApiRequest, res: ApiResponse) => {
+    // Get accepted sort parameters.
+    const acceptedSort = ["id", "name", "position", "created_at", "updated_at", "deleted_at"];
+    const acceptedFilter = ["id", "name", "position", "video"]
+    
+    // Assert the pagination parameters.
+    if (req.pagination?.sort && !acceptedSort.includes(req.pagination.sort)) {
+        return res.status(400).json({
+            code: 400,
+            message: "Invalid sort parameter."
+        });
+    }
+
+    // Create the where clause.
+    const where = Util.generateWhereClause(req.pagination?.filters ?? {}, acceptedFilter);
+
+    // Get every challenge in the database.
+    const challenges = await Database.challenge.findMany({
+        where,
+        take: req.pagination?.limit,
+        skip: req.pagination?.after,
+        orderBy: {
+            [req.pagination?.sort || "id"]: req.pagination?.order ?? "desc"
+        }
+    });
+
+    // Set Link header.
+    res.set("Link", Util.generateLinkHeader("/api/challenges", req.pagination?.limit ?? 50, req.pagination?.after ?? 0, req.pagination?.before ?? 0, challenges.length));
+    
+    // Return the challenges.
+    return res.status(200).json({
+        code: 200,
+        data: challenges,
+    });
+});
+
 router.post("/", async(req: ApiRequest, res: ApiResponse) => {
     if (!req.account?.has(Permissions.MANAGE_CHALLENGES)) {
         return res.status(401).json({
@@ -176,9 +212,7 @@ router.post("/", async(req: ApiRequest, res: ApiResponse) => {
     return res.status(200).json({
         code: 200,
         message: "Successfully created challenge.",
-        data: {
-            challenge: challengeWithData
-        }
+        data: challengeWithData
     });
 });
 
