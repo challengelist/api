@@ -2,6 +2,7 @@ model Challenge {
     id       Int    @id @default(autoincrement())
     name     String
     position Int
+    video    String
 
     verifier_id  Int
     publisher_id Int
@@ -30,8 +31,9 @@ enum ChallengeStatus {
     REMOVED
     VISIBLE
 }
+
 model Record {
-    id Int @id @default(autoincrement())
+    id           Int       @id @default(autoincrement())
     challenge_id Int
-    challenge Challenge @relation(fields: [challenge_id], references: [id])
+    challenge    Challenge @relation(fields: [challenge_id], references: [id])
 }
