@@ -11,6 +11,9 @@ model Record {
     player    Player    @relation(fields: [player_id], references: [id])
     submitter Account?  @relation(fields: [submitter_id], references: [id])
 
+    submitted_on DateTime? @default(now())
+    modified_on DateTime? @default(now())
+
     @@map("records")
 }
 
