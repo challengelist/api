@@ -65,6 +65,14 @@ router.post("/login", async (req: ApiRequest, res: ApiResponse) => {
         });
     }
 
+    // Assert body types.
+    if (typeof req.body.username !== "string" || typeof req.body.password !== "string") {
+        return res.status(400).json({
+            code: 400,
+            message: "Invalid username or password!"
+        });
+    }
+
     // Check if the username is taken.
     const account = await Database.account.findFirst({
         where: {

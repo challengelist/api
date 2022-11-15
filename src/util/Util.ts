@@ -20,6 +20,20 @@ export class Util {
         return true;
     }
 
+    static assertObjectTypes(obj: any, types: Record<string, string>) {
+        for (const [key, type] of Object.entries(types)) {
+            if (!obj.hasOwnProperty(key)) {
+                continue;
+            }
+
+            if (typeof obj[key] !== type) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     static generateWhereClause(filters: Record<string, string>, acceptedKeys: string[] = []) {
         const where: Record<string, string | number> = {};
 

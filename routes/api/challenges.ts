@@ -12,7 +12,7 @@ router.get("/", async (req: ApiRequest, res: ApiResponse) => {
     // Get accepted sort parameters.
     const acceptedSort = ["id", "name", "position", "created_at", "updated_at", "deleted_at"];
     const acceptedFilter = ["id", "name", "position", "video"]
-    
+
     // Assert the pagination parameters.
     if (req.pagination?.sort && !acceptedSort.includes(req.pagination.sort)) {
         return res.status(400).json({
@@ -36,7 +36,7 @@ router.get("/", async (req: ApiRequest, res: ApiResponse) => {
 
     // Set Link header.
     res.set("Link", Util.generateLinkHeader("/api/challenges", req.pagination?.limit ?? 50, req.pagination?.after ?? 0, req.pagination?.before ?? 0, challenges.length));
-    
+
     // Return the challenges.
     return res.status(200).json({
         code: 200,
@@ -115,7 +115,7 @@ router.get("/:id", async (req: ApiRequest, res: ApiResponse) => {
     });
 });
 
-router.post("/", async(req: ApiRequest, res: ApiResponse) => {
+router.post("/", async (req: ApiRequest, res: ApiResponse) => {
     if (!req.account?.has(Permissions.MANAGE_CHALLENGES)) {
         return res.status(401).json({
             code: 401,
@@ -134,6 +134,22 @@ router.post("/", async(req: ApiRequest, res: ApiResponse) => {
         return res.status(400).json({
             code: 400,
             message: "Invalid request body."
+        });
+    }
+
+    // Assert body types.
+    if (!Util.assertObjectTypes(req.body, {
+        name: "string",
+        position: "number",
+        video: "string",
+        creators: "object",
+        verifier: "string",
+        publisher: "string",
+        fps: "string",
+    })) {
+        return res.status(400).json({
+            code: 400,
+            message: "Invalid body types."
         });
     }
 
@@ -175,7 +191,7 @@ router.post("/", async(req: ApiRequest, res: ApiResponse) => {
     // Get the current players in the database.
     const players = await Database.player.findMany();
     const creatorsArray: string[] = req.body.creators;
-    
+
     // Get the verifier, if it exists.
     let verifier = players.find(player => player.name === req.body.verifier);
 
@@ -224,7 +240,9 @@ router.post("/", async(req: ApiRequest, res: ApiResponse) => {
             verifier_id: verifier.id,
             publisher_id: publisher.id,
             video: req.body.video,
-            
+            fps: req.body.fps ?? "Any",
+            points_worth: 0,
+
             // Map the creators to their IDs.
             creators: {
                 connect: creators.map(creator => ({
@@ -292,6 +310,22 @@ router.patch("/:id", async (req: ApiRequest, res: ApiResponse) => {
         return res.status(401).json({
             code: 401,
             message: "You are not authorized to use this endpoint!"
+        });
+    }
+
+    // Assert body types.
+    if (!Util.assertObjectTypes(req.body, {
+        name: "string",
+        position: "number",
+        video: "string",
+        creators: "object",
+        verifier: "string",
+        publisher: "string",
+        fps: "string",
+    })) {
+        return res.status(400).json({
+            code: 400,
+            message: "Invalid body types."
         });
     }
 
