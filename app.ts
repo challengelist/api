@@ -6,6 +6,7 @@ import multer from "multer";
 
 import { AccountMiddleware } from "./src/middleware/AccountMiddleware";
 import { RouterMiddleware } from "./src/middleware/RouterMiddleware";
+import { PaginationMiddleware } from "./src/middleware/PaginationMiddleware";
 
 // Add environment variables.
 dotenv.config();
@@ -60,6 +61,7 @@ app.use(morgan((tokens, req, res) => {
 
 // Our own middleware next.
 app.use(AccountMiddleware.handle);
+app.use(PaginationMiddleware.handle)
 
 // Handle our own lower router-esque middleware.
 RouterMiddleware.handle(app);
