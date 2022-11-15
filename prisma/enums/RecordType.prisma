@@ -1,0 +1,4 @@
+enum RecordType {
+    VERIFICATION
+    COMPLETION
+}

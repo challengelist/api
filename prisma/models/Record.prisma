@@ -1,14 +1,15 @@
 model Record {
-    id Int @id @default(autoincrement())
-    video String
-    status RecordStatus @default(SUBMITTED)
+    id           Int          @id @default(autoincrement())
+    video        String
+    status       RecordStatus @default(SUBMITTED)
+    type         RecordType   @default(COMPLETION)
     challenge_id Int
-    player_id Int
+    player_id    Int
     submitter_id Int?
 
     challenge Challenge @relation(fields: [challenge_id], references: [id])
-    player Player @relation(fields: [player_id], references: [id])
-    submitter Account? @relation(fields: [submitter_id], references: [id])
+    player    Player    @relation(fields: [player_id], references: [id])
+    submitter Account?  @relation(fields: [submitter_id], references: [id])
 
     @@map("records")
 }
@@ -20,17 +21,22 @@ enum RecordStatus {
     SUBMITTED
 }
 
+enum RecordType {
+    VERIFICATION
+    COMPLETION
+}
+
 model Challenge {
-    id       Int    @id @default(autoincrement())
-    records   Record[]
+    id      Int      @id @default(autoincrement())
+    records Record[]
 }
 
 model Player {
-    id Int @id @default(autoincrement())
+    id      Int      @id @default(autoincrement())
     records Record[]
 }
 
 model Account {
-    id            Int    @id @default(autoincrement())
+    id          Int      @id @default(autoincrement())
     submissions Record[]
 }
