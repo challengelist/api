@@ -44,6 +44,75 @@ router.get("/", async (req: ApiRequest, res: ApiResponse) => {
     });
 });
 
+
+router.get("/list", async (req: ApiRequest, res: ApiResponse) => {
+    const allowedTypes = ["legacy", "main"];
+
+    const type = req.query.type as string ?? "main";
+
+    // Assert the type parameter.
+    if (!allowedTypes.includes(type)) {
+        return res.status(400).json({
+            code: 400,
+            message: "Invalid type parameter."
+        });
+    }
+
+    let after = 0;
+    if (type === "legacy") {
+        after = parseInt(process.env.CL_MAX_CHALLENGES ?? "100");
+    }
+
+    // Get the challenges.
+    const challenges = await Database.challenge.findMany({
+        skip: after,
+        take: parseInt(process.env.CL_MAX_CHALLENGES ?? "100"),
+        orderBy: {
+            position: "desc"
+        }
+    });
+
+    // Return the challenges.
+    return res.status(200).json({
+        code: 200,
+        data: challenges
+    });
+});
+
+router.get("/:id", async (req: ApiRequest, res: ApiResponse) => {
+    // Parse the ID.
+    const id = parseInt(req.params.id as string);
+
+    // Assert the ID is a number.
+    if (isNaN(id)) {
+        return res.status(400).json({
+            code: 400,
+            message: "An invalid id was provided."
+        });
+    }
+
+    // Get the challenge.
+    const challenge = await Database.challenge.findFirst({
+        where: {
+            id
+        }
+    });
+
+    // Check if the challenge exists.
+    if (!challenge) {
+        return res.status(404).json({
+            code: 404,
+            message: "This chhallenge was not found."
+        });
+    }
+
+    // Return the challenge.
+    return res.status(200).json({
+        code: 200,
+        data: challenge
+    });
+});
+
 router.post("/", async(req: ApiRequest, res: ApiResponse) => {
     if (!req.account?.has(Permissions.MANAGE_CHALLENGES)) {
         return res.status(401).json({
