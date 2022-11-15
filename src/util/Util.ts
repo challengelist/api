@@ -19,4 +19,38 @@ export class Util {
 
         return true;
     }
+
+    static generateWhereClause(filters: Record<string, string>, acceptedKeys: string[] = []) {
+        const where: Record<string, string | number> = {};
+
+        for (const [key, value] of Object.entries(filters)) {
+            if (acceptedKeys.length > 0 && !acceptedKeys.includes(key)) {
+                continue;
+            }
+
+            let num = parseInt(value);
+
+            if (!isNaN(num)) {
+                where[key] = num;
+            } else {
+                where[key] = value;
+            }
+        }
+
+        return where;
+    }
+
+    static generateLinkHeader(url: string, limit: number, after: number, before: number, total: number) {
+        const links: string[] = [];
+
+        if (after > 0) {
+            links.push(`<${url}?limit=${limit}&after=${after - limit}>; rel="prev"`);
+        }
+
+        if (before < total) {
+            links.push(`<${url}?limit=${limit}&after=${after + limit}>; rel="next"`);
+        }
+
+        return links.join(", ");
+    }
 }
