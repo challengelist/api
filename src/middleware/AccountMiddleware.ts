@@ -5,6 +5,7 @@ import { ApiRequest } from "../interfaces/ApiRequest";
 import { ApiResponse } from "../interfaces/ApiResponse";
 import { TokenType } from "../structures/enums/TokenType";
 import { GlobalSingleton } from "../util/GlobalSingleton";
+import { UserAccount } from "../structures/UserAccount";
 
 interface TokenData {
     id: number;
@@ -86,7 +87,7 @@ export class AccountMiddleware {
 
                 // Set the account.
                 if (account) {
-                    req.account = account;
+                    req.account = new UserAccount(account);
                 }
             }
         }
