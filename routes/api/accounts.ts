@@ -17,7 +17,7 @@ router.get("/@me", async(req: ApiRequest, res: ApiResponse) => {
     return res.status(200).json({
         code: 200,
         message: "Success!",
-        data: new DisplayAccount(req.account)
+        data: DisplayAccount.fromUserAccount(req.account)
     });
 });
 
