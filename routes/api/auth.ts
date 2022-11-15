@@ -7,13 +7,14 @@ import { ApiResponse } from "../../src/interfaces/ApiResponse";
 import { DisplayAccount } from "../../src/structures/DisplayAccount";
 import { TokenType } from "../../src/structures/enums/TokenType";
 import { GlobalSingleton } from "../../src/util/GlobalSingleton";
+import { Util } from "../../src/util/Util";
 
 const router = Router();
 
 // Account endpoints
 router.post("/register", async (req: ApiRequest, res: ApiResponse) => {
     // Assert the body.
-    if (!req.body.username || !req.body.password) {
+    if (!Util.assertObject(req.body, ["username", "password"])) {
         return res.status(400).json({
             code: 400,
             message: "Missing username or password!"
@@ -57,7 +58,7 @@ router.post("/register", async (req: ApiRequest, res: ApiResponse) => {
 
 router.post("/login", async (req: ApiRequest, res: ApiResponse) => {
     // Assert the body.
-    if (!req.body.username || !req.body.password) {
+    if (!Util.assertObject(req.body, ["username", "password"])) {
         return res.status(400).json({
             code: 400,
             message: "Missing username or password!"
