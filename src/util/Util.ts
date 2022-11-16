@@ -6,6 +6,7 @@ export class Util {
         throw new Error("This class may not be instantiated!");
     }
 
+    // ASSERTIONS
     static assertObject(obj: any, keys: string[]) {
         if (typeof obj !== "object") {
             return false;
@@ -65,6 +66,7 @@ export class Util {
         return true;
     }
 
+    // GENERATORS
     static generateWhereClause(filters: Record<string, string>, acceptedKeys: string[] = []) {
         const where: Record<string, string | number> = {};
 
