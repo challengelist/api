@@ -21,13 +21,13 @@ export class Util {
         return true;
     }
 
-    static assertObjectTypes(obj: any, types: Record<string, string>) {
+    static assertObjectTypes(obj: any, types: object) {
         for (const [key, type] of Object.entries(types)) {
             if (!obj.hasOwnProperty(key)) {
                 continue;
             }
 
-            if (type.endsWith("[]")) {
+            if (typeof type == "string" && type.endsWith("[]")) {
                 // Handle arrays.
                 if (!Array.isArray(obj[key])) {
                     console.log("not array");
