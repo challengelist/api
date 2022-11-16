@@ -81,7 +81,8 @@ export class AccountMiddleware {
                     include: {
                         badges: true,
                         groups: true,
-                        profile: true
+                        profile: true,
+                        submissions: true
                     }
                 });
 
