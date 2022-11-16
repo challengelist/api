@@ -14,6 +14,7 @@ export class DisplayAccount {
     public groups: Group[];
     public profile: Player | null;
     public permissions: number;
+    public flags: number;
 
     constructor(account: Account & {
         badges: Badge[];
@@ -27,6 +28,7 @@ export class DisplayAccount {
         this.badges = account.badges;
         this.groups = account.groups;
         this.profile = account.profile;
+        this.flags = account.flags;
 
         // Handle permissions.
         const adminGroup = account.groups.find(group => group.permissions_grant & Permissions.ADMINISTRATOR);
