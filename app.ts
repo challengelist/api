@@ -31,10 +31,10 @@ app.use(morgan((tokens, req, res) => {
             method = chalk.bgHex("#00aaff").black(` ${method} `);
             break;
         case "DELETE":
-            method = chalk.bgHex("#4000ff").black(` ${method} `);
+            method = chalk.bgHex("#ff0040").black(` ${method} `);
             break;
         case "PATCH":
-            method = chalk.bgHex("#ff0040").black(` ${method} `);
+            method = chalk.bgHex("#4000ff").black(` ${method} `);
             break;
     }
 
