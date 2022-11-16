@@ -26,9 +26,40 @@ export class Util {
                 continue;
             }
 
-            if (typeof obj[key] !== type) {
-                return false;
+            if (type.endsWith("[]")) {
+                // Handle arrays.
+                if (!Array.isArray(obj[key])) {
+                    console.log("not array");
+                    return false;
+                }
+
+                let trueType = type.slice(0, -2);
+
+                if (trueType === "any") {
+                    continue;
+                }
+
+                for (const item of obj[key]) {
+                    if (typeof item !== trueType) {
+                        return false;
+                    }
+                }
+            } else if (typeof type == "object") {
+                // Handle objects.
+                if (typeof obj[key] !== "object") {
+                    return false;
+                }
+
+                if (!this.assertObjectTypes(obj[key], type)) {
+                    return false;
+                }
+            } else {
+                // Handle normal types.
+                if (typeof obj[key] !== type) {
+                    return false;
+                }
             }
+
         }
 
         return true;
