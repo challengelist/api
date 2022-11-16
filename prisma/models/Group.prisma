@@ -1,22 +1,25 @@
 model Group {
-    id Int @id @default(autoincrement())
-    name String
-    short_name String?
-    priority Int
-    color String @default("#FFFFFF")
-    background_color String @default("#000000")
-    icon String?
-    visible Boolean @default(true)
+    id               Int     @id @default(autoincrement())
+    parent_id        Int?
+    name             String
+    short_name       String?
+    priority         Int
+    color            String  @default("#FFFFFF")
+    background_color String  @default("#000000")
+    icon             String?
+    visible          Boolean @default(true)
 
-    permissions_grant Int @default(0)
+    permissions_grant  Int @default(0)
     permissions_revoke Int @default(0)
 
     accounts Account[]
+    parent   Group?    @relation("GroupToGroup", fields: [parent_id], references: [id])
+    children Group[]   @relation("GroupToGroup")
 
     @@map("groups")
 }
 
 model Account {
-    id            Int    @id @default(autoincrement())
-    groups       Group[]
+    id     Int     @id @default(autoincrement())
+    groups Group[]
 }
