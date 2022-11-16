@@ -41,9 +41,9 @@ export class DisplayAccount {
                 this.permissions |= Permissions[key as keyof typeof Permissions];
             }
         } else {
-            this.permissions = account.groups
-                .reduce((a, b) => a | b.permissions_grant, 0)
-                & account.groups.reduce((a, b) => a & ~b.permissions_revoke, 0);
+            this.permissions = account.groups.reduce((permissions, group) => {
+                return permissions |= group.permissions_grant;
+            }, 0);
         }
     }
 
