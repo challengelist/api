@@ -4,21 +4,19 @@ import { GlobalSingleton } from "../util/GlobalSingleton";
 import { Permissions } from "../util/Permissions";
 import { TokenType } from "./enums/TokenType";
 
+export type DeeperAccount = Account & {
+    badges: Badge[];
+    groups: Group[];
+    profile: Player | null;
+}
+
 /**
  * A representation of a user's account.
  */
 export class UserAccount {
-    data: Account & {
-        badges: Badge[];
-        groups: Group[];
-        profile: Player | null;
-    }
+    data: DeeperAccount
 
-    constructor(account: Account & {
-        badges: Badge[];
-        groups: Group[];
-        profile: Player | null;
-    }) {
+    constructor(account: DeeperAccount) {
         this.data = account;
     }
 
