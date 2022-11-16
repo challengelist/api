@@ -1,6 +1,5 @@
 model Group {
     id               Int     @id @default(autoincrement())
-    parent_id        Int?
     name             String
     short_name       String?
     priority         Int
@@ -13,8 +12,6 @@ model Group {
     permissions_revoke Int @default(0)
 
     accounts Account[]
-    parent   Group?    @relation("GroupToGroup", fields: [parent_id], references: [id])
-    children Group[]   @relation("GroupToGroup")
 
     @@map("groups")
 }
