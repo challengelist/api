@@ -5,6 +5,7 @@ import { ApiResponse } from "../../src/interfaces/ApiResponse";
 import { Util } from "../../src/util/Util";
 import { Permissions } from "../../src/util/Permissions";
 import { Database } from "../../prisma";
+import { isEqual } from "lodash";
 
 const router = Router();
 
@@ -142,7 +143,7 @@ router.post("/", async (req: ApiRequest, res: ApiResponse) => {
         name: "string",
         position: "number",
         video: "string",
-        creators: "object",
+        creators: "string[]",
         verifier: "string",
         publisher: "string",
         fps: "string",
@@ -202,20 +203,26 @@ router.post("/", async (req: ApiRequest, res: ApiResponse) => {
                 name: req.body.verifier
             }
         });
+
+        // Add the verifier to the players array.
+        players.push(verifier);
     }
 
     // Get the creators, if they exist.
     const creators = await Promise.all(creatorsArray.map(async creator => {
-        const player = players.find(player => player.name === creator);
+        let player = players.find(player => player.name === creator);
 
         if (!player) {
             // Create the player.
-            await Database.player.create({
+            player = await Database.player.create({
                 data: {
                     name: creator
                 }
             });
         }
+
+        // Add the creator to the players array.
+        players.push(player);
 
         return player;
     }));
@@ -230,6 +237,9 @@ router.post("/", async (req: ApiRequest, res: ApiResponse) => {
                 name: req.body.publisher
             }
         });
+
+        // Add the publisher to the players array.
+        players.push(publisher);
     }
 
     // Create the challenge.
@@ -318,7 +328,7 @@ router.patch("/:id", async (req: ApiRequest, res: ApiResponse) => {
         name: "string",
         position: "number",
         video: "string",
-        creators: "object",
+        creators: "string[]",
         verifier: "string",
         publisher: "string",
         fps: "string",
@@ -432,7 +442,7 @@ router.patch("/:id", async (req: ApiRequest, res: ApiResponse) => {
         if (!req.body.video) {
             return res.status(400).json({
                 code: 400,
-                message: "A video is required when changing the verifier."
+                message: "A video is required when changing the verifier. It can be the same video, however."
             });
         }
 
@@ -518,54 +528,59 @@ router.patch("/:id", async (req: ApiRequest, res: ApiResponse) => {
     }
 
     if (req.body.creators) {
-        changes.push("creators");
 
         // Assert that all the creators exist.
         const creatorsArray = req.body.creators as string[];
 
-        // Get all the players.
-        const players = await Database.player.findMany({
-            where: {
-                name: {
-                    in: creatorsArray
-                }
-            }
-        });
+        // Check if the creators are the same.
+        if (creatorsArray.length !== challenge.creators.length || isEqual(creatorsArray.sort(), challenge.creators.map(creator => creator.name).sort())) {
+            changes.push("creators");
 
-        // Find the creators that don't exist.
-        const creators = creatorsArray.filter(creator => !players.find(player => player.name === creator));
-
-        // Create the creators.
-        await Promise.all(creators.map(async creator => {
-            await Database.player.create({
-                data: {
-                    name: creator
+            // Get all the players.
+            const players = await Database.player.findMany({
+                where: {
+                    name: {
+                        in: creatorsArray
+                    }
                 }
             });
-        }));
 
-        // Get the players again.
-        const playersWithNewCreators = await Database.player.findMany({
-            where: {
-                name: {
-                    in: creatorsArray
-                }
-            }
-        });
+            // Find the creators that don't exist.
+            const creators = creatorsArray.filter(creator => !players.find(player => player.name === creator));
 
-        // Update the challenge's creators.
-        await Database.challenge.update({
-            where: {
-                id: challenge.id
-            },
-            data: {
-                creators: {
-                    connect: playersWithNewCreators.map(player => ({
-                        id: player.id
-                    }))
+            // Create the creators.
+            await Promise.all(creators.map(async creator => {
+                const player = await Database.player.create({
+                    data: {
+                        name: creator
+                    }
+                });
+
+                // Add the creator to the players array.
+                players.push(player);
+            }));
+
+            // Get the plaayers in the array.
+            const newCreators = players.filter(player => creatorsArray.includes(player.name));
+
+            // Update the challenge's creators.
+            await Database.challenge.update({
+                where: {
+                    id: challenge.id
+                },
+                data: {
+                    creators: {
+                        connect: newCreators.map(player => ({
+                            id: player.id
+                        }))
+                    }
                 }
-            }
-        });
+            });
+        }
+    }
+
+    if (req.body.fps && req.body.fps !== challenge.fps) {
+        changes.push("fps");
     }
 
     // Handle the changes.
@@ -578,6 +593,7 @@ router.patch("/:id", async (req: ApiRequest, res: ApiResponse) => {
                 name: req.body.name || challenge.name,
                 position: req.body.position || challenge.position,
                 video: req.body.video || challenge.video,
+                fps: req.body.fps || challenge.fps
             }
         });
 
