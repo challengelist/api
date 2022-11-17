@@ -116,6 +116,45 @@ router.get("/:id", async (req: ApiRequest, res: ApiResponse) => {
     });
 });
 
+router.get("/:id/creators", async (req: ApiRequest, res: ApiResponse) => {
+    // Parse the ID.
+    const id = parseInt(req.params.id as string);
+
+    // Assert the ID is a number.
+    if (isNaN(id)) {
+        return res.status(400).json({
+            code: 400,
+            message: "An invalid id was provided."
+        });
+    }
+
+    // Get the challenge.
+    const challenge = await Database.challenge.findFirst({
+        where: {
+            id
+        },
+        include: {
+            creators: true
+        }
+    });
+
+    // Check if the challenge exists.
+    if (!challenge) {
+        return res.status(404).json({
+            code: 404,
+            message: "This challenge was not found."
+        });
+    }
+
+    // Return the challenge creators..
+    return res.status(200).json({
+        code: 200,
+        data: {
+            creators: challenge.creators
+        }
+    });
+});
+
 router.post("/", async (req: ApiRequest, res: ApiResponse) => {
     if (!req.account?.has(Permissions.MANAGE_CHALLENGES)) {
         return res.status(401).json({
@@ -186,6 +225,14 @@ router.post("/", async (req: ApiRequest, res: ApiResponse) => {
         return res.status(400).json({
             code: 400,
             message: "Invalid request body."
+        });
+    }
+
+    // Assert the video URL.
+    if (!(await Util.assertAcceptableVideoLink(req.body.video))) {
+        return res.status(400).json({
+            code: 400,
+            message: "Invalid video URL."
         });
     }
 
@@ -315,6 +362,238 @@ router.post("/", async (req: ApiRequest, res: ApiResponse) => {
     });
 });
 
+router.post("/:id/creators", async (req: ApiRequest, res: ApiResponse) => {
+    if (!req.account?.has(Permissions.MANAGE_CHALLENGES)) {
+        return res.status(401).json({
+            code: 401,
+            message: "You are not authorized to use this endpoint!"
+        });
+    }
+
+    // Assert the only required body parameter.
+    if (!Util.assertObject(req.body, [
+        "creator"
+    ])) {
+        return res.status(400).json({
+            code: 400,
+            message: "Invalid request body."
+        });
+    }
+
+    // Assert body types.
+    if (!Util.assertObjectTypes(req.body, {
+        creator: "string"
+    })) {
+        return res.status(400).json({
+            code: 400,
+            message: "Invalid body types."
+        });
+    }
+    const id = parseInt(req.params.id as string);
+
+    if (isNaN(id)) {
+        return res.status(400).json({
+            code: 400,
+            message: "Invalid challenge ID."
+        });
+    }
+
+    // Get the challenge.
+    const challenge = await Database.challenge.findFirst({
+        where: {
+            id
+        },
+        include: {
+            creators: true
+        }
+    });
+
+    if (!challenge) {
+        return res.status(404).json({
+            code: 404,
+            message: "Challenge not found."
+        });
+    }
+
+    // Check if the creator is already in the challenge.
+    if (challenge.creators.find(creator => creator.name === req.body.creator)) {
+        return res.status(400).json({
+            code: 400,
+            message: "This player is already a creator for this challenge."
+        });
+    }
+
+    // Check if the creator exists.
+    let creator = await Database.player.findFirst({
+        where: {
+            name: req.body.creator
+        }
+    });
+
+    if (!creator) {
+        // Create the creator.
+        creator = await Database.player.create({
+            data: {
+                name: req.body.creator
+            }
+        });
+    }
+
+    // Add the creator to the challenge.
+    const newChallenge = await Database.challenge.update({
+        where: {
+            id: challenge.id
+        },
+        data: {
+            creators: {
+                connect: {
+                    id: creator.id
+                }
+            }
+        },
+        include: {
+            creators: true
+        }
+    });
+
+    // Return the creator.
+    return res.status(200).json({
+        code: 200,
+        message: "Successfully added creator.",
+        data: {
+            creators: newChallenge.creators,
+            creator
+        }
+    })
+})
+
+router.patch("/:id/creators", async (req: ApiRequest, res: ApiResponse) => {
+    if (!req.account?.has(Permissions.MANAGE_CHALLENGES)) {
+        return res.status(401).json({
+            code: 401,
+            message: "You are not authorized to use this endpoint!"
+        });
+    }
+
+    // Assert the only required body parameter.
+    if (!Util.assertObject(req.body, [
+        "creators"
+    ])) {
+        return res.status(400).json({
+            code: 400,
+            message: "Invalid request body."
+        });
+    }
+
+    // Assert body types.
+    if (!Util.assertObjectTypes(req.body, {
+        creators: "string[]"
+    })) {
+        return res.status(400).json({
+            code: 400,
+            message: "Invalid body types."
+        });
+    }
+
+    const id = parseInt(req.params.id as string);
+
+    if (isNaN(id)) {
+        return res.status(400).json({
+            code: 400,
+            message: "Invalid challenge ID."
+        });
+    }
+
+    // Get the challenge.
+    const challenge = await Database.challenge.findFirst({
+        where: {
+            id
+        },
+        include: {
+            creators: true
+        }
+    });
+
+    if (!challenge) {
+        return res.status(404).json({
+            code: 404,
+            message: "Challenge not found."
+        });
+    }
+
+    // Assert that all the creators exist.
+    const creatorsArray = req.body.creators as string[];
+
+    // Check if the creators are the same.
+    if (creatorsArray.length !== challenge.creators.length || isEqual(creatorsArray.sort(), challenge.creators.map(creator => creator.name).sort())) {
+        // Get all the players.
+        const players = await Database.player.findMany({
+            where: {
+                name: {
+                    in: creatorsArray
+                }
+            }
+        });
+
+        // Find the creators that don't exist.
+        const creators = creatorsArray.filter(creator => !players.find(player => player.name === creator));
+
+        // Create the creators.
+        await Promise.all(creators.map(async creator => {
+            const player = await Database.player.create({
+                data: {
+                    name: creator
+                }
+            });
+
+            // Add the creator to the players array.
+            players.push(player);
+        }));
+
+        // Assert that no duplicates exist.
+        let alreadyThere: string[] = [];
+        const unique = players.filter(player => {
+            if (alreadyThere.includes(player.name)) {
+                return false;
+            } else {
+                alreadyThere.push(player.name);
+                return true;
+            }
+        });
+
+        // Get the plaayers in the array.
+        const newCreators = unique.filter(player => creatorsArray.includes(player.name));
+
+        // Update the challenge's creators.
+        let newChallenge = await Database.challenge.update({
+            where: {
+                id: challenge.id
+            },
+            data: {
+                creators: {
+                    connect: newCreators.map(player => ({
+                        id: player.id
+                    }))
+                }
+            },
+            include: {
+                creators: true
+            }
+        });
+
+        return res.status(200).json({
+            code: 200,
+            message: "Successfully updated challenge creators.",
+            data: newChallenge.creators
+        });
+    } else {
+        return res.status(400).json({
+            code: 400,
+            message: "These players are all assigned as creators already."
+        });
+    }
+});
+
 router.patch("/:id", async (req: ApiRequest, res: ApiResponse) => {
     if (!req.account?.has(Permissions.MANAGE_CHALLENGES)) {
         return res.status(401).json({
@@ -432,6 +711,7 @@ router.patch("/:id", async (req: ApiRequest, res: ApiResponse) => {
         }));
     }
 
+    let videoValidated = false;
     if (req.body.verifier && req.body.verifier !== challenge.verifier.name) {
         changes.push("verifier");
 
@@ -445,6 +725,17 @@ router.patch("/:id", async (req: ApiRequest, res: ApiResponse) => {
                 message: "A video is required when changing the verifier. It can be the same video, however."
             });
         }
+
+        // Assert the video URL.
+        if (!(await Util.assertAcceptableVideoLink(req.body.video))) {
+            return res.status(400).json({
+                code: 400,
+                message: "Invalid video URL."
+            });
+        }
+
+        // Video is valid.
+        videoValidated = true;
 
         // Get the verifier.
         let verifier = await Database.player.findFirst({
@@ -518,13 +809,13 @@ router.patch("/:id", async (req: ApiRequest, res: ApiResponse) => {
 
     if (req.body.video && req.body.video !== challenge.video) {
         changes.push("video");
-    }
-
-    if (req.body.creators && !Array.isArray(req.body.creators)) {
-        return res.status(400).json({
-            code: 400,
-            message: "The creators must be an array."
-        });
+        // Assert the video URL if necessary.
+        if (!videoValidated && !(await Util.assertAcceptableVideoLink(req.body.video))) {
+            return res.status(400).json({
+                code: 400,
+                message: "Invalid video URL."
+            });
+        }
     }
 
     if (req.body.creators) {
@@ -707,6 +998,94 @@ router.delete("/:id", async (req: ApiRequest, res: ApiResponse) => {
         message: "Challenge deleted successfully.",
         data: {
             challenge
+        }
+    });
+});
+
+router.delete("/:id/creators", async (req: ApiRequest, res: ApiResponse) => {
+    if (!req.account?.has(Permissions.MANAGE_CHALLENGES)) {
+        return res.status(401).json({
+            code: 401,
+            message: "You are not authorized to use this endpoint!"
+        });
+    }
+
+    // Assert the only required body parameter.
+    if (!Util.assertObject(req.body, [
+        "creator"
+    ])) {
+        return res.status(400).json({
+            code: 400,
+            message: "Invalid request body."
+        });
+    }
+
+    // Assert body types.
+    if (!Util.assertObjectTypes(req.body, {
+        creator: "string"
+    })) {
+        return res.status(400).json({
+            code: 400,
+            message: "Invalid body types."
+        });
+    }
+    const id = parseInt(req.params.id as string);
+
+    if (isNaN(id)) {
+        return res.status(400).json({
+            code: 400,
+            message: "Invalid challenge ID."
+        });
+    }
+
+    // Get the challenge.
+    const challenge = await Database.challenge.findFirst({
+        where: {
+            id
+        },
+        include: {
+            creators: true
+        }
+    });
+
+    if (!challenge) {
+        return res.status(404).json({
+            code: 404,
+            message: "Challenge not found."
+        });
+    }
+
+    // Check if the creator is missing.
+    if (!challenge.creators.find(creator => creator.name === req.body.creator)) {
+        return res.status(404).json({
+            code: 404,
+            message: "Creator not found."
+        });
+    }
+
+    let creator = challenge.creators.find(creator => creator.name === req.body.creator);
+
+    // Remove the creator.
+    await Database.challenge.update({
+        where: {
+            id: challenge.id
+        },
+        data: {
+            creators: {
+                disconnect: {
+                    id: creator?.id
+                }
+            }
+        }
+    });
+
+    // Return the creator.
+    return res.status(200).json({
+        code: 200,
+        message: "Creator removed successfully.",
+        data: {
+            creators: challenge.creators.filter(creator => creator.name !== req.body.creator),
+            creator
         }
     });
 });
