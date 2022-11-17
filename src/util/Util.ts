@@ -1,3 +1,7 @@
+import fetch from "node-fetch";
+
+export const YOUTUBE_REGEX = /https?:\/\/((www|m)\.?)?youtu(\.be|be\.com)\/(watch\?v=|w\/)?(\w{11})$/g
+
 /**
  * A class full of utilities to use in the API.
  */
@@ -7,6 +11,35 @@ export class Util {
     }
 
     // ASSERTIONS
+    static assertAcceptableVideoLink(video: string) {
+        return new Promise((resolve) => {
+            let validVideo = false;
+            let type = "unknown";
+            if (video.match(YOUTUBE_REGEX)) {
+                validVideo = true;
+                type = "youtube";
+            }
+
+            if (!validVideo) {
+                return resolve(false);
+            }
+
+            if (type === "youtube") {
+                const id = (video.match(YOUTUBE_REGEX) ?? [])[6] ?? "";
+                const url = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${id}&format=json`;
+                fetch(url).then((res) => {
+                    if (res.status === 200) {
+                        resolve(true);
+                    } else {
+                        resolve(false);
+                    }
+                }).catch(() => {
+                    resolve(false);
+                });
+            }
+        })
+    }
+
     static assertObject(obj: any, keys: string[]) {
         if (typeof obj !== "object") {
             return false;
