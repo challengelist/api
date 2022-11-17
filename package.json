@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "script": "node scripts/scriptHandler.js",
+    "run": "ts-node app.ts",
     "lint": "npx eslint .",
     "lint:fix": "npx eslint . --fix",
     "db:merge": "npx aurora",
