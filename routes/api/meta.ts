@@ -10,7 +10,6 @@ const router = Router();
 router.get("/staff", async(req: ApiRequest, res: ApiResponse) => {
     // Get all accounts.
     const accounts = await Database.account.findMany({
-        
         include: {
             badges: true,
             groups: true,
