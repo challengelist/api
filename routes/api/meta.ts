@@ -26,12 +26,12 @@ router.get("/staff", async(req: ApiRequest, res: ApiResponse) => {
     // Filter list staff members.
     const listStaff = displayAccounts.filter(account => {
         // Don't count the site owner.
-        if (account.permissions & Permissions.ADMINISTRATOR) {
+        if (account.has(Permissions.ADMINISTRATOR)) {
             return false;
         }
 
         // Check if the account is a list staff member.
-        if (account.permissions & Permissions.MANAGE_RECORDS) {
+        if (account.has(Permissions.MANAGE_RECORDS)) {
             return true;
         }
 
@@ -42,7 +42,7 @@ router.get("/staff", async(req: ApiRequest, res: ApiResponse) => {
     // Filter site staff members.
     const siteStaff = displayAccounts.filter(account => {
         // Check if the account is a site staff member.
-        if (account.permissions & Permissions.BAN_ACCOUNTS) {
+        if (account.has(Permissions.BAN_ACCOUNTS)) {
             return true;
         }
 
