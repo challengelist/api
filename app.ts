@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import express from "express";
 import morgan from "morgan";
 import multer from "multer";
+import cors from "cors";
 
 import { AccountMiddleware } from "./src/middleware/AccountMiddleware";
 import { RouterMiddleware } from "./src/middleware/RouterMiddleware";
@@ -15,6 +16,7 @@ dotenv.config();
 const app = express();
 
 // Add any actual middleware here.
+app.use(cors());
 app.use(express.json());
 app.use(multer().any());
 app.use(morgan((tokens, req, res) => {
