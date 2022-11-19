@@ -58,25 +58,40 @@ router.post("/register", async (req: ApiRequest, res: ApiResponse) => {
 
 router.post("/login", async (req: ApiRequest, res: ApiResponse) => {
     // Assert the body.
-    if (!Util.assertObject(req.body, ["username", "password"])) {
-        return res.status(400).json({
-            code: 400,
-            message: "Missing username or password!"
-        });
-    }
+    let username;
+    let password;
+    if (req.headers["authorization"]?.startsWith("Basic")) {
+        // Basic authorization protocol.
+        let header = req.headers["authorization"].slice(6);
+        let decoded = Buffer.from(header, "base64").toString("utf-8");
+        let split = decoded.split(":");
 
-    // Assert body types.
-    if (typeof req.body.username !== "string" || typeof req.body.password !== "string") {
-        return res.status(400).json({
-            code: 400,
-            message: "Invalid username or password!"
-        });
-    }
+        username = split[0];
+        password = split[1];
+    } else {
+        // Content body.
+        if (!Util.assertObject(req.body, ["username", "password"])) {
+            return res.status(400).json({
+                code: 400,
+                message: "Missing username or password!"
+            });
+        }
 
+        // Assert body types.
+        if (typeof req.body.username !== "string" || typeof req.body.password !== "string") {
+            return res.status(400).json({
+                code: 400,
+                message: "Invalid username or password!"
+            });
+        }
+
+        username = req.body.username;
+        password = req.body.password;
+    }
     // Check if the username is taken.
     const account = await Database.account.findFirst({
         where: {
-            username: req.body.username
+            username: username
         },
         include: {
             badges: true,
@@ -93,7 +108,7 @@ router.post("/login", async (req: ApiRequest, res: ApiResponse) => {
     }
 
     // Check if the password is correct.
-    if (!await argon2.verify(account.password_hash, req.body.password)) {
+    if (!await argon2.verify(account.password_hash, password)) {
         return res.status(400).json({
             code: 400,
             message: "Invalid username or password!"
