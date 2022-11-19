@@ -19,6 +19,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(multer().any());
+let latestResponse;
 app.use(morgan((tokens, req, res) => {
     let method = tokens.method(req, res);
 
@@ -58,7 +59,10 @@ app.use(morgan((tokens, req, res) => {
     const url = tokens.url(req, res);
     statusString = statusString.padStart(Math.max(1, 15 - (url?.length ?? 0)), "E");
 
-    return [`[${chalk.gray(tokens.date(req, res, "clf"))}]`, statusHeader, method, tokens.url(req, res), statusString, "-", tokens["response-time"](req, res), "ms"].join(" ");
+    let now = new Date();
+    let format = new Intl.DateTimeFormat();
+
+    return [`[${chalk.gray(format.format(now))}]`, statusHeader, method, tokens.url(req, res), statusString, "-", tokens["response-time"](req, res), "ms"].join(" ");
 }));
 
 // Our own middleware next.
@@ -71,6 +75,9 @@ RouterMiddleware.handle(app);
 
 // Create a listener.
 app.listen(process.env.CL_PORT, () => {
-    console.log(`Server started on port ${process.env.CL_PORT}!`);   
+    let now = new Date();
+    let format = new Intl.DateTimeFormat();
+    console.log(`[${chalk.gray(format.format(now))}]  ${chalk.gray(`Challenge List API: `)}`)
+    console.log(`[${chalk.gray(format.format(now))}]  Server started on port ${process.env.CL_PORT}!`);   
     console.log("");   
 });
