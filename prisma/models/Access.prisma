@@ -1,0 +1,7 @@
+model Access {
+    id Int @id @default(autoincrement())
+    discord_id String
+    access_token String
+
+    @@map("access_codes")
+}
