@@ -1,6 +1,11 @@
 import fetch from "node-fetch";
 
-export const YOUTUBE_REGEX = /https?:\/\/((www|m)\.?)?youtu(\.be|be\.com)\/(watch\?v=|w\/)?(\w{11})$/g
+export const YOUTUBE_REGEX = /https?:\/\/((www|m)\.?)?youtu(\.be|be\.com)\/(watch\?v=|w\/)?(\w{11})$/g;
+
+type WhereOptions = {
+    special: string[];
+    handle: (filter: string, value: string) => string | number | object | undefined;
+}
 
 /**
  * A class full of utilities to use in the API.
@@ -8,6 +13,21 @@ export const YOUTUBE_REGEX = /https?:\/\/((www|m)\.?)?youtu(\.be|be\.com)\/(watc
 export class Util {
     constructor() {
         throw new Error("This class may not be instantiated!");
+    }
+
+    // EXCLUSIONS
+    static exclude<T, K extends keyof T>(obj: T | T[], keys: K[]): any { // meow
+        if (Array.isArray(obj)) {
+            return obj.map((val, i) => {
+                return Util.exclude(val, keys);
+            })
+        } else {
+            for (let key of keys) {
+                delete obj[key];
+            }
+        }
+
+        return obj;
     }
 
     // ASSERTIONS
@@ -100,12 +120,16 @@ export class Util {
     }
 
     // GENERATORS
-    static generateWhereClause(filters: Record<string, string>, acceptedKeys: string[] = []) {
-        const where: Record<string, string | number> = {};
+    static generateWhereClause(filters: Record<string, string>, acceptedKeys: string[] = [], options?: WhereOptions) {
+        const where: Record<string, string | number | object> = {};
 
         for (const [key, value] of Object.entries(filters)) {
             if (acceptedKeys.length > 0 && !acceptedKeys.includes(key)) {
                 continue;
+            }
+
+            if (options?.special.includes(key)) {
+                options.handle(key, value);
             }
 
             let num = parseInt(value);
