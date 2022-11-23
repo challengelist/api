@@ -1,0 +1,21 @@
+// This has to be here otherwise Prisma will complain
+datasource db {
+    provider =  "postgresql"
+    url      =  env("CL_DATABASE_URL")
+}
+
+model RecordNote {
+    id           Int          @id @default(autoincrement())
+    author_id    Int
+    editor_ids   Int[]
+
+    author Account @relation("notes", fields: [author_id], references: [id])
+
+    @@map("record_notes")
+}
+
+model Account {
+    id            Int    @id @default(autoincrement())
+
+    notes RecordNote[] @relation("notes")
+}

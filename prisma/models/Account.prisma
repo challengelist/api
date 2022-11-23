@@ -11,6 +11,7 @@ model Account {
     groups  Group[]
     profile Player?
     submissions Record[]
+    notes RecordNote[] @relation("notes")
 
     permissions_grant Int @default(0)
     permissions_revoke Int @default(0)
@@ -49,3 +50,10 @@ model Session {
     account Account @relation(fields: [account_id], references: [id])
 }
 
+model RecordNote {
+    id           Int          @id @default(autoincrement())
+    author_id    Int
+    author Account @relation("notes", fields: [author_id], references: [id])
+
+    @@map("record_notes")
+}
