@@ -13,6 +13,9 @@ model Account {
     submissions Record[]
     notes RecordNote[] @relation("notes")
 
+    country_code String @default("XX")
+    subdivision_code String @default("XX-XX")
+
     permissions_grant Int @default(0)
     permissions_revoke Int @default(0)
     flags Int @default(0)
