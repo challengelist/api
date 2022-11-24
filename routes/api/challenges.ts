@@ -1,18 +1,18 @@
-import { Router } from "express";
 import { RecordStatus, RecordType } from "@prisma/client";
+import { Router } from "express";
+import { isEqual } from "lodash";
+import { Database } from "../../prisma";
 import { ApiRequest } from "../../src/interfaces/ApiRequest";
 import { ApiResponse } from "../../src/interfaces/ApiResponse";
-import { Util } from "../../src/util/Util";
 import { Permissions } from "../../src/util/Permissions";
-import { Database } from "../../prisma";
-import { isEqual } from "lodash";
+import { Util } from "../../src/util/Util";
 
 const router = Router();
 
 router.get("/", async (req: ApiRequest, res: ApiResponse) => {
     // Get accepted sort parameters.
     const acceptedSort = ["id", "name", "position", "created_at", "updated_at", "deleted_at"];
-    const acceptedFilter = ["id", "name", "position", "video"]
+    const acceptedFilter = ["id", "name", "position", "video"];
 
     // Assert the pagination parameters.
     if (req.pagination?.sort && !acceptedSort.includes(req.pagination.sort)) {
@@ -34,7 +34,7 @@ router.get("/", async (req: ApiRequest, res: ApiResponse) => {
             [req.pagination?.sort || "id"]: req.pagination?.order ?? "desc"
         }
     });
-
+    
     // Set Link header.
     res.set("Link", Util.generateLinkHeader("/api/challenges", req.pagination?.limit ?? 50, req.pagination?.after ?? 0, req.pagination?.before ?? 0, challenges.length));
 
@@ -464,8 +464,8 @@ router.post("/:id/creators", async (req: ApiRequest, res: ApiResponse) => {
             creators: newChallenge.creators,
             creator
         }
-    })
-})
+    });
+});
 
 router.patch("/:id/creators", async (req: ApiRequest, res: ApiResponse) => {
     if (!req.account?.has(Permissions.MANAGE_CHALLENGES)) {
@@ -551,7 +551,7 @@ router.patch("/:id/creators", async (req: ApiRequest, res: ApiResponse) => {
         }));
 
         // Assert that no duplicates exist.
-        let alreadyThere: string[] = [];
+        const alreadyThere: string[] = [];
         const unique = players.filter(player => {
             if (alreadyThere.includes(player.name)) {
                 return false;
@@ -565,7 +565,7 @@ router.patch("/:id/creators", async (req: ApiRequest, res: ApiResponse) => {
         const newCreators = unique.filter(player => creatorsArray.includes(player.name));
 
         // Update the challenge's creators.
-        let newChallenge = await Database.challenge.update({
+        const newChallenge = await Database.challenge.update({
             where: {
                 id: challenge.id
             },
@@ -651,13 +651,13 @@ router.patch("/:id", async (req: ApiRequest, res: ApiResponse) => {
     }
 
     // Handle possible changes.
-    let changes = [];
+    const changes = [];
 
     if (req.body.name && req.body.name !== challenge.name) {
         changes.push("name");
     }
 
-    let position = parseInt(req.body.position as string);
+    const position = parseInt(req.body.position as string);
     if (req.body.position && position !== challenge.position) {
         changes.push("position");
 
@@ -1063,7 +1063,7 @@ router.delete("/:id/creators", async (req: ApiRequest, res: ApiResponse) => {
         });
     }
 
-    let creator = challenge.creators.find(creator => creator.name === req.body.creator);
+    const creator = challenge.creators.find(creator => creator.name === req.body.creator);
 
     // Remove the creator.
     await Database.challenge.update({
