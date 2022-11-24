@@ -1,13 +1,13 @@
 import chalk from "chalk";
+import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 import morgan from "morgan";
 import multer from "multer";
-import cors from "cors";
 
 import { AccountMiddleware } from "./src/middleware/AccountMiddleware";
-import { RouterMiddleware } from "./src/middleware/RouterMiddleware";
 import { PaginationMiddleware } from "./src/middleware/PaginationMiddleware";
+import { RouterMiddleware } from "./src/middleware/RouterMiddleware";
 
 // Add environment variables.
 dotenv.config();
@@ -19,7 +19,6 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(multer().any());
-let latestResponse;
 app.use(morgan((tokens, req, res) => {
     let method = tokens.method(req, res);
 
@@ -59,15 +58,15 @@ app.use(morgan((tokens, req, res) => {
     const url = tokens.url(req, res);
     statusString = statusString.padStart(Math.max(1, 15 - (url?.length ?? 0)), "E");
 
-    let now = new Date();
-    let format = new Intl.DateTimeFormat();
+    const now = new Date();
+    const format = new Intl.DateTimeFormat();
 
     return [`[${chalk.gray(format.format(now))}]`, statusHeader, method, tokens.url(req, res), statusString, "-", tokens["response-time"](req, res), "ms"].join(" ");
 }));
 
 // Our own middleware next.
 app.use(AccountMiddleware.handle);
-app.use(PaginationMiddleware.handle)
+app.use(PaginationMiddleware.handle);
 
 // Handle our own lower router-esque middleware.
 RouterMiddleware.handle(app);
@@ -75,9 +74,9 @@ RouterMiddleware.handle(app);
 
 // Create a listener.
 app.listen(process.env.CL_PORT, () => {
-    let now = new Date();
-    let format = new Intl.DateTimeFormat();
-    console.log(`[${chalk.gray(format.format(now))}]  ${chalk.gray(`Challenge List API: `)}`)
+    const now = new Date();
+    const format = new Intl.DateTimeFormat();
+    console.log(`[${chalk.gray(format.format(now))}]  ${chalk.gray("Challenge List API: ")}`);
     console.log(`[${chalk.gray(format.format(now))}]  Server started on port ${process.env.CL_PORT}!`);   
     console.log("");   
 });

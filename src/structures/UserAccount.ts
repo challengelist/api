@@ -14,7 +14,7 @@ export type DeeperAccount = Account & {
  * A representation of a user's account.
  */
 export class UserAccount {
-    data: DeeperAccount
+    data: DeeperAccount;
 
     constructor(account: DeeperAccount) {
         this.data = account;
@@ -22,19 +22,20 @@ export class UserAccount {
 
     /**
      * Asserts that the account has the specified permission.
-     * @param permissions The permissions to check for.
+     * @param permission The permissions to check for.
      */
-    has(permissions: number) {
+    has(permission: number) {
         // Handle permissions.
         const adminGroup = this.data.groups.find(group => group.permissions_grant & Permissions.ADMINISTRATOR);
 
         if (adminGroup) {
             // Grant all permissions
+            console.log("is admin");
             return true;
         } else {
-            return this.data.groups
+            return (this.data.groups
                 .reduce((a, b) => a | b.permissions_grant, 0)
-                & this.data.groups.reduce((a, b) => a & ~b.permissions_revoke, 0) & permissions;
+                & this.data.groups.reduce((a, b) => a & ~b.permissions_revoke, 0)) === permission;
         }
     }
 

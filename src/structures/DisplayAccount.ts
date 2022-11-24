@@ -48,7 +48,7 @@ export class DisplayAccount {
     }
 
     has(permission: Permissions) {
-        return (this.permissions & permission) == permission;
+        return (this.permissions & permission) === permission;
     }
 
     static fromUserAccount(account: UserAccount) {

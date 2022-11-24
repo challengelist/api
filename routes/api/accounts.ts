@@ -35,7 +35,7 @@ router.get("/@me/key", async (req: ApiRequest, res: ApiResponse) => {
         });
     }
 
-    let token = req.account.data.api_key
+    let token = req.account.data.api_key;
     if (!token) {
         // Generate a new API key.
         token = req.account.generateApiToken();
@@ -48,7 +48,7 @@ router.get("/@me/key", async (req: ApiRequest, res: ApiResponse) => {
             data: {
                 api_key: token
             }
-        })
+        });
     }
 
     return res.status(200).json({
@@ -137,7 +137,7 @@ router.patch("/:id", async (req: ApiRequest, res: ApiResponse) => {
         }
     }
 
-    let changes = [];
+    const changes = [];
 
     if (req.body.groups) {
         // Get the groups.
@@ -197,7 +197,7 @@ router.patch("/:id", async (req: ApiRequest, res: ApiResponse) => {
 
         // Update the account if there are changes.
         if (changes.includes("groups")) {
-            let newerAccount = await Database.account.update({
+            await Database.account.update({
                 where: {
                     id: account.id
                 },
@@ -288,13 +288,20 @@ router.patch("/:id", async (req: ApiRequest, res: ApiResponse) => {
             }
         });
 
+        if (!updatedAccount) {
+            return res.status(500).json({
+                code: 500,
+                message: "An internal server error has occured."
+            });
+        }
+
         // Return the updated account.
         return res.status(200).json({
             code: 200,
             message: "Successfully updated the account!",
             data: {
                 changes,
-                account: new DisplayAccount(updatedAccount!)
+                account: new DisplayAccount(updatedAccount)
             }
         });
     } else {
@@ -324,7 +331,7 @@ router.delete("/@me/key", async (req: ApiRequest, res: ApiResponse) => {
         data: {
             api_key: token
         }
-    })
+    });
 
     return res.status(200).json({
         code: 200,
