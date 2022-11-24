@@ -10,6 +10,7 @@ model Player {
     records Record[]
 
     account Account? @relation(fields: [account_id], references: [id])
+    flags Int @default(0)
 
     @@map("players")
 }
