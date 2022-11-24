@@ -2,7 +2,7 @@ const fs = require("fs");
 const inquirer = require("inquirer");
 
 // Import all the scripts.
-const scripts = []
+const scripts = [];
 
 for (let file of fs.readdirSync(__dirname)) {
     if (file.endsWith(".js")) {

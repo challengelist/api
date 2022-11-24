@@ -62,9 +62,9 @@ router.post("/login", async (req: ApiRequest, res: ApiResponse) => {
     let password;
     if (req.headers["authorization"]?.startsWith("Basic")) {
         // Basic authorization protocol.
-        let header = req.headers["authorization"].slice(6);
-        let decoded = Buffer.from(header, "base64").toString("utf-8");
-        let split = decoded.split(":");
+        const header = req.headers["authorization"].slice(6);
+        const decoded = Buffer.from(header, "base64").toString("utf-8");
+        const split = decoded.split(":");
 
         username = split[0];
         password = split[1];

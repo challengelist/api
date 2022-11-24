@@ -37,7 +37,7 @@ export class DisplayAccount {
             // Grant all permissions
             this.permissions = 0;
 
-            for (let key of Object.keys(Permissions)) {
+            for (const key of Object.keys(Permissions)) {
                 this.permissions |= Permissions[key as keyof typeof Permissions];
             }
         } else {
@@ -52,6 +52,6 @@ export class DisplayAccount {
     }
 
     static fromUserAccount(account: UserAccount) {
-        return new DisplayAccount(account.data)
+        return new DisplayAccount(account.data);
     }
 }

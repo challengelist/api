@@ -20,7 +20,7 @@ router.get("/staff", async(req: ApiRequest, res: ApiResponse) => {
 
     // Map the accounts to display accounts.
     const displayAccounts = accounts.map((account) => new DisplayAccount(account));
-    console.log(displayAccounts)
+    console.log(displayAccounts);
 
     // Filter list staff members.
     const listStaff = displayAccounts.filter(account => {

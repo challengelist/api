@@ -4,8 +4,8 @@ import { Database } from "../../prisma";
 import { ApiRequest } from "../interfaces/ApiRequest";
 import { ApiResponse } from "../interfaces/ApiResponse";
 import { TokenType } from "../structures/enums/TokenType";
-import { GlobalSingleton } from "../util/GlobalSingleton";
 import { UserAccount } from "../structures/UserAccount";
+import { GlobalSingleton } from "../util/GlobalSingleton";
 
 interface TokenData {
     id: number;

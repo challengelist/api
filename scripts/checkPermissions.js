@@ -1,7 +1,7 @@
 // @ts-check
+const { PrismaClient } = require("@prisma/client");
 const chalk = require("chalk");
 const inquirer = require("inquirer");
-const { PrismaClient } = require("@prisma/client");
 
 // All current permissions.
 const Permissions = {
@@ -29,7 +29,7 @@ const Permissions = {
     // LIST HELPER PERMISSIONS
     MANAGE_RECORDS: 1 << 11,
     MANAGE_SUBMITTERS: 1 << 12
-}
+};
 
 
 let client = new PrismaClient();
@@ -41,22 +41,22 @@ module.exports = {
             orderBy: {
                 priority: "desc"
             }
-        })
+        });
 
         for (let group of groups) {
-            console.log(`${chalk.hex("#9c9c9c")`Group ${group.id}: ${chalk.hex(group.color).bgHex(group.background_color)` ${group.name.toUpperCase()} `}'s permissions:`}`)
+            console.log(`${chalk.hex("#9c9c9c")`Group ${group.id}: ${chalk.hex(group.color).bgHex(group.background_color)` ${group.name.toUpperCase()} `}'s permissions:`}`);
 
             for (let perm of Object.keys(Permissions)) {
                 if (group.permissions_grant & Permissions[perm]) {
-                    console.log(`${chalk.hex("#9c9c9c")`Grant: ${chalk.hex("#8bd68e")`${perm}`}`}`)
+                    console.log(`${chalk.hex("#9c9c9c")`Grant: ${chalk.hex("#8bd68e")`${perm}`}`}`);
                 }
 
                 if (group.permissions_revoke & Permissions[perm]) {
-                    console.log(`${chalk.hex("#9c9c9c")`Revoke: ${chalk.hex("#d68b8b")`${perm}`}`}`)
+                    console.log(`${chalk.hex("#9c9c9c")`Revoke: ${chalk.hex("#d68b8b")`${perm}`}`}`);
                 }
             }
 
             console.log("");
         }
     }
-}
+};

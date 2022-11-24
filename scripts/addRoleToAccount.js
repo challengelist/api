@@ -1,5 +1,5 @@
-const inquirer = require("inquirer");
 const { PrismaClient } = require("@prisma/client");
+const inquirer = require("inquirer");
 
 let client = new PrismaClient();
 module.exports = {
@@ -43,4 +43,4 @@ module.exports = {
             });
         });
     }
-}
+};
