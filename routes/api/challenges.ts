@@ -728,8 +728,8 @@ router.patch("/:id", async (req: ApiRequest, res: ApiResponse) => {
 
         // Assert the video URL.
         if (!(await Util.assertAcceptableVideoLink(req.body.video))) {
-            return res.status(400).json({
-                code: 400,
+            return res.status(422).json({
+                code: 422,
                 message: "Invalid video URL."
             });
         }

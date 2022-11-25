@@ -159,7 +159,7 @@ router.post("/", async (req: ApiRequest, res: ApiResponse) => {
     }
 
     // Validate the video.
-    if (!await Util.assertAcceptableVideoLink(req.body.video)) {
+    if (!(await Util.assertAcceptableVideoLink(req.body.video))) {
         return res.status(422).json({
             code: 422,
             message: "An invalid video was provided."
