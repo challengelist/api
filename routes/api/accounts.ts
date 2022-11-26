@@ -1,9 +1,10 @@
-import { Router } from "express";
+import { NextFunction, Router } from "express";
 import { Database } from "../../prisma";
 import { ApiRequest } from "../../src/interfaces/ApiRequest";
 import { ApiResponse } from "../../src/interfaces/ApiResponse";
 import { DisplayAccount } from "../../src/structures/DisplayAccount";
 import { Permissions } from "../../src/util/Permissions";
+import { createError } from "../../src/util/StatusCodes";
 import { UserFlags } from "../../src/util/UserFlags";
 import { Util } from "../../src/util/Util";
 
@@ -59,13 +60,10 @@ router.get("/@me/key", async (req: ApiRequest, res: ApiResponse) => {
     });
 });
 
-router.patch("/:id", async (req: ApiRequest, res: ApiResponse) => {
+router.patch("/:id", async (req: ApiRequest, res: ApiResponse, next: NextFunction) => {
     // This is a circumstantial endpoint which changes permissions based on the user's roles and percieved permissions.
     if (!req.account) {
-        return res.status(401).json({
-            code: 401,
-            message: "You are not authorized to use this endpoint!"
-        });
+        return next(createError(401, 40100));
     }
 
     // Assert body types.
@@ -122,24 +120,26 @@ router.patch("/:id", async (req: ApiRequest, res: ApiResponse) => {
     // Assert that the user has a higher role than the account they're trying to edit.
     if (accountGroups.length > 0) {
         if (ownGroups[0].priority <= accountGroups[0].priority && !req.account.has(Permissions.ADMINISTRATOR)) {
-            return res.status(403).json({
-                code: 403,
-                message: "You do not have permission to edit this account!"
-            });
+            return next(createError(403, 40302));
         }
     } else {
         if (ownGroups.length === 0 && !req.account.has(Permissions.ADMINISTRATOR)) {
             // It's pretty unlikely that an account with no groups can edit an account with no groups.
-            return res.status(403).json({
-                code: 403,
-                message: "You do not have permission to edit this account!"
-            });
+            return next(createError(403, 40301));
         }
     }
 
     const changes = [];
 
     if (req.body.groups) {
+        // Check whether the account can perform this action.
+        if (!req.account.has(Permissions.MANAGE_USER_GROUPS)) {
+            return next(createError(403, 40300, {
+                required: [
+                    "MANAGE_USER_GROUPS"
+                ]
+            }));
+        }
         // Get the groups.
         const toAddGroups = await Database.group.findMany({
             where: {
@@ -219,12 +219,8 @@ router.patch("/:id", async (req: ApiRequest, res: ApiResponse) => {
         if (req.body.bans.submissions !== undefined) {
             // Check whether the user has permission to ban submissions.
             if (!req.account.has(Permissions.MANAGE_SUBMITTERS)) {
-                return res.status(403).json({
-                    code: 403,
-                    message: "You do not have permission to ban accounts from submitting records!"
-                });
+                return next(createError(403, 40304));
             }
-
 
             // Update the account with the new submission ban flag.
             if (req.body.bans.submissions && !(account.flags & UserFlags.SUBMISSION_BANNED)) {
@@ -258,10 +254,11 @@ router.patch("/:id", async (req: ApiRequest, res: ApiResponse) => {
     if (req.body.username !== undefined) {
         // Check whether the user has permission to change usernames.
         if (!req.account.has(Permissions.MANAGE_ACCOUNTS)) {
-            return res.status(403).json({
-                code: 403,
-                message: "You do not have permission to edit this account!"
-            });
+            return next(createError(403, 40300, {
+                required: [
+                    "MANAGE_ACCOUNTS"
+                ]
+            }));
         }
     }
 

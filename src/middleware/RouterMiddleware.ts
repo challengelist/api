@@ -1,6 +1,8 @@
-import { Application } from "express";
+import { Application, NextFunction } from "express";
 import fs from "fs";
 import path from "path";
+import { ErrorObject, ApiRequest } from "../interfaces/ApiRequest";
+import { ApiResponse } from "../interfaces/ApiResponse";
 
 const BASE_PATH = path.join(__dirname, "../", "../", "routes");
 
@@ -26,6 +28,13 @@ export class RouterMiddleware {
                         // Import the router.
                         const router = route[key];
                         if (router.stack) {
+                            // Lowest-level error handler.
+                            router.use((error: ErrorObject, req: ApiRequest, res: ApiResponse, _: NextFunction) => {
+                                if (error) {
+                                    return res.status(error.status).json(error);
+                                }
+                            });
+
                             app.use(routePath, router);
                         }
                     }

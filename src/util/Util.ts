@@ -16,13 +16,13 @@ export class Util {
     }
 
     // EXCLUSIONS
-    static exclude<T, K extends keyof T>(obj: T | T[], keys: K[]): any { // meow
+    static exclude<T, K extends keyof T>(obj: T | T[], keys: K[]): Omit<T, K> | Omit<T, K>[] { // meow
         if (Array.isArray(obj)) {
-            return obj.map((val, i) => {
-                return Util.exclude(val, keys);
-            })
+            return obj.map((val) => {
+                return Util.exclude(val, keys) as T;
+            });
         } else {
-            for (let key of keys) {
+            for (const key of keys) {
                 delete obj[key];
             }
         }
@@ -31,18 +31,25 @@ export class Util {
     }
 
     // ASSERTIONS
+    static resolveVideoType(video: string) {
+        let validVideo = false;
+        let type = "unknown";
+
+        if (video.match(YOUTUBE_REGEX)) {
+            validVideo = true;
+            type = "youtube";
+        }
+
+        if (!validVideo) {
+            return null;
+        }
+
+        return type;
+    }
+    
     static assertAcceptableVideoLink(video: string) {
         return new Promise((resolve) => {
-            let validVideo = false;
-            let type = "unknown";
-            if (video.match(YOUTUBE_REGEX)) {
-                validVideo = true;
-                type = "youtube";
-            }
-
-            if (!validVideo) {
-                return resolve(false);
-            }
+            const type = Util.resolveVideoType(video);
 
             if (type === "youtube") {
                 const id = (video.match(YOUTUBE_REGEX) ?? [])[6] ?? "";
@@ -56,8 +63,22 @@ export class Util {
                 }).catch(() => {
                     resolve(false);
                 });
+            } else {
+                resolve(false);
             }
-        })
+        });
+    }
+
+    static normalizeVideoLink(video: string) {
+        const type = Util.resolveVideoType(video);
+
+        if (type === "youtube") {
+            const id = (video.match(YOUTUBE_REGEX) ?? [])[6] ?? "";
+
+            return `https://www.youtube.com/watch?v=${id}`;
+        } else {
+            return null;
+        }
     }
 
     static assertObject(obj: any, keys: string[]) {
@@ -80,14 +101,14 @@ export class Util {
                 continue;
             }
 
-            if (typeof type == "string" && type.endsWith("[]")) {
+            if (typeof type === "string" && type.endsWith("[]")) {
                 // Handle arrays.
                 if (!Array.isArray(obj[key])) {
                     console.log("not array");
                     return false;
                 }
 
-                let trueType = type.slice(0, -2);
+                const trueType = type.slice(0, -2);
 
                 if (trueType === "any") {
                     continue;
@@ -98,7 +119,7 @@ export class Util {
                         return false;
                     }
                 }
-            } else if (typeof type == "object") {
+            } else if (typeof type === "object") {
                 // Handle objects.
                 if (typeof obj[key] !== "object") {
                     return false;
@@ -129,10 +150,12 @@ export class Util {
             }
 
             if (options?.special.includes(key)) {
-                options.handle(key, value);
+                where[key] = options.handle(key, value) ?? value;
+
+                continue;
             }
 
-            let num = parseInt(value);
+            const num = parseInt(value);
 
             if (!isNaN(num)) {
                 where[key] = num;
